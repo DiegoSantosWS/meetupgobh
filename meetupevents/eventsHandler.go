@@ -9,6 +9,7 @@ import (
 
 	"github.com/DiegoSantosWS/meetupgobh/auth"
 	"github.com/DiegoSantosWS/meetupgobh/httputils"
+	"github.com/DiegoSantosWS/meetupgobh/utils"
 
 	"github.com/eladmica/go-meetup/meetup"
 )
@@ -26,9 +27,9 @@ func HandlerAllEvents(w http.ResponseWriter, r *http.Request) {
 
 	client := auth.Authetication()
 	param := meetup.GetEventsParams{
-		Page:   1,
+		Page:   2,
 		Scroll: "future_or_past",
-		Desc:   true,
+		Desc:   false,
 	}
 	events, err := client.GetEvents("go-belo-horizonte", &param)
 	if err != nil {
@@ -40,14 +41,14 @@ func HandlerAllEvents(w http.ResponseWriter, r *http.Request) {
 		evs := meetups{
 			Name:        ev.Name,
 			Description: ev.Description,
-			EventDate:   ev.LocalDate,
+			EventDate:   utils.DateConvertUnix(int64(ev.Time), "RFC3339"),
 			Link:        ev.Link,
 			LimitRSVP:   int64(ev.RSVPLimit),
 			YesRSVP:     int64(ev.YesRSVPCount),
 		}
 		mtup = append(mtup, evs)
 	}
-	
+
 	meetp, err := json.Marshal(mtup)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusPreconditionFailed)
